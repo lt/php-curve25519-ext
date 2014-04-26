@@ -4,9 +4,18 @@
 
 #include "php.h"
 
+const unsigned char basepoint[32] = {9};
+
+void curve25519_clamp(unsigned char secret[32])
+{
+	secret[0] &= 248;
+	secret[31] &= 127;
+	secret[31] |= 64;
+}
+
 PHP_FUNCTION(curve25519_public)
 {
-	char *secret;
+	unsigned char *secret;
 	int secret_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &secret, &secret_len) == FAILURE) {
@@ -18,15 +27,23 @@ PHP_FUNCTION(curve25519_public)
 		RETURN_FALSE;
 	}
 
-	RETURN_TRUE;
+	char *clamped = estrdup(secret);
+	curve25519_clamp(clamped);
+
+	unsigned char public[33];
+	curve25519_donna(public, clamped, basepoint);
+
+	efree(clamped);
+
+	RETURN_STRINGL(public, 32, 1);
 }
 
 PHP_FUNCTION(curve25519_shared)
 {
-	char *secret;
+	unsigned char *secret;
 	int secret_len;
 
-	char *public;
+	unsigned char *public;
 	int public_len;
 
 
@@ -44,7 +61,15 @@ PHP_FUNCTION(curve25519_shared)
 		RETURN_FALSE;
 	}
 
-	RETURN_TRUE;
+	char *clamped = estrdup(secret);
+	curve25519_clamp(clamped);
+
+	unsigned char shared[33];
+	curve25519_donna(shared, secret, public);
+
+	efree(clamped);
+
+	RETURN_STRINGL(shared, 32, 1);
 }
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_curve25519_public, 0, 0, 1)
