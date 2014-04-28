@@ -65,7 +65,7 @@ PHP_FUNCTION(curve25519_shared)
 	curve25519_clamp(clamped);
 
 	unsigned char shared[33];
-	curve25519_donna(shared, secret, public);
+	curve25519_donna(shared, clamped, public);
 
 	efree(clamped);
 
