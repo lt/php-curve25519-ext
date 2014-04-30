@@ -34,3 +34,28 @@ make
 sudo make install
 ```
 Finally add `extension=curve25519.so` to your /etc/php.ini
+
+### Multi-party shared secrets:
+
+When more than two parties are communicating, it is necessary to communicate intermediate values so that each party can compute a common shared secret
+
+```
+$alicePrivate = str_repeat('a', 32);
+$bobPrivate   = str_repeat('b', 32);
+$carolPrivate = str_repeat('c', 32);
+
+$alicePublic = curve25519_public($alicePrivate); // Send to Bob
+$bobPublic   = curve25519_public($bobPrivate);   // Send to Carol
+$carolPublic = curve25519_public($carolPrivate); // Send to Alice
+
+$aliceCarolShared = curve25519_shared($alicePrivate, $carolPublic); // Send to Bob
+$bobAliceShared   = curve25519_shared($bobPrivate,   $alicePublic); // Send to Carol
+$carolBobShared   = curve25519_shared($carolPrivate, $bobPublic);   // Send to Alice
+
+$aliceShared = curve25519_shared($alicePrivate, $carolBobShared);
+$bobShared   = curve25519_shared($bobPrivate,   $aliceCarolShared);
+$carolShared = curve25519_shared($carolPrivate, $bobAliceShared);
+
+// An adversary observed f(a), f(b), f(c), f(ab), f(ac), and f(bc), whereas each party solved for f(abc)
+var_dump($aliceShared === $bobShared && $bobShared === $carolShared);
+```
