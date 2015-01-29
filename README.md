@@ -27,7 +27,7 @@ It is not necessary for you to perform key clamping as detailed at http://cr.yp.
 
 ```
 git clone git://github.com/lt/php-curve25519-ext.git
-cd php-curve25519
+cd php-curve25519-ext
 phpize
 ./configure
 make
