@@ -26,7 +26,7 @@ It is not necessary for you to perform key clamping as detailed at http://cr.yp.
 ### How to install:
 
 ```
-git clone git://github.com/lt/php-curve25519.git
+git clone git://github.com/lt/php-curve25519-ext.git
 cd php-curve25519
 phpize
 ./configure
