@@ -16,7 +16,11 @@ void curve25519_clamp(unsigned char secret[32])
 PHP_FUNCTION(curve25519_public)
 {
 	unsigned char *secret;
-	int secret_len;
+#if PHP_VERSION_ID >= 70000
+    size_t secret_len;
+#else
+    int secret_len;
+#endif	
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &secret, &secret_len) == FAILURE) {
 		RETURN_FALSE;
@@ -35,17 +39,28 @@ PHP_FUNCTION(curve25519_public)
 
 	efree(clamped);
 
+#if PHP_VERSION_ID >= 70000
+	RETURN_STRINGL(public, 32);
+#else
 	RETURN_STRINGL(public, 32, 1);
+#endif
 }
 
 PHP_FUNCTION(curve25519_shared)
 {
 	unsigned char *secret;
-	int secret_len;
+#if PHP_VERSION_ID >= 70000
+    size_t secret_len;
+#else
+    int secret_len;
+#endif	
 
 	unsigned char *public;
-	int public_len;
-
+#if PHP_VERSION_ID >= 70000
+    size_t public_len;
+#else
+    int public_len;
+#endif	
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &secret, &secret_len, &public, &public_len) == FAILURE) {
 		RETURN_FALSE;
@@ -69,7 +84,11 @@ PHP_FUNCTION(curve25519_shared)
 
 	efree(clamped);
 
+#if PHP_VERSION_ID >= 70000
+	RETURN_STRINGL(shared, 32);
+#else
 	RETURN_STRINGL(shared, 32, 1);
+#endif
 }
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_curve25519_public, 0, 0, 1)
