@@ -5,6 +5,8 @@
 #include "php.h"
 #include "php_curve25519.h"
 #include "ext/standard/info.h"
+#include "zend_exceptions.h"
+#include "ext/spl/spl_exceptions.h"
 
 const unsigned char basepoint[32] = {9};
 
@@ -30,8 +32,7 @@ PHP_FUNCTION(curve25519_public)
 #endif
 
 	if (secret_len != 32) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Secret must be 32 bytes");
-		RETURN_FALSE;
+		zend_throw_exception(spl_ce_InvalidArgumentException, "Secret must be 32 bytes", 0 TSRMLS_CC);
 	}
 
 	// curve25519_donna clamps, and would modify $secret
@@ -72,13 +73,11 @@ PHP_FUNCTION(curve25519_shared)
 #endif
 
 	if (secret_len != 32) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Secret must be 32 bytes");
-		RETURN_FALSE;
+		zend_throw_exception(spl_ce_InvalidArgumentException, "Secret must be 32 bytes", 0 TSRMLS_CC);
 	}
 
 	if (public_len != 32) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Public must be 32 bytes");
-		RETURN_FALSE;
+		zend_throw_exception(spl_ce_InvalidArgumentException, "Public must be 32 bytes", 0 TSRMLS_CC);
 	}
 
 	unclamped = estrdup(secret);
