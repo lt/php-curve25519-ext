@@ -8,13 +8,6 @@
 
 const unsigned char basepoint[32] = {9};
 
-void curve25519_clamp(unsigned char secret[32])
-{
-	secret[0] &= 248;
-	secret[31] &= 127;
-	secret[31] |= 64;
-}
-
 PHP_FUNCTION(curve25519_public)
 {
 	char *secret;
@@ -23,6 +16,8 @@ PHP_FUNCTION(curve25519_public)
 #else
     int secret_len;
 #endif	
+	char public[32];
+	char *unclamped;
 
 #ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &secret, &secret_len) == FAILURE) {
@@ -39,13 +34,10 @@ PHP_FUNCTION(curve25519_public)
 		RETURN_FALSE;
 	}
 
-	char *clamped = estrdup(secret);
-	curve25519_clamp(clamped);
-
-	char public[33];
-	curve25519_donna(public, clamped, basepoint);
-
-	efree(clamped);
+	// curve25519_donna clamps, and would modify $secret
+	unclamped = estrdup(secret);
+	curve25519_donna(public, unclamped, basepoint);
+	efree(unclamped);
 
 #if PHP_VERSION_ID >= 70000
 	RETURN_STRINGL(public, 32);
@@ -65,6 +57,8 @@ PHP_FUNCTION(curve25519_shared)
     int secret_len;
     int public_len;
 #endif	
+	char shared[32];
+	char *unclamped;
 
 #ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &secret, &secret_len, &public, &public_len) == FAILURE) {
@@ -87,13 +81,9 @@ PHP_FUNCTION(curve25519_shared)
 		RETURN_FALSE;
 	}
 
-	char *clamped = estrdup(secret);
-	curve25519_clamp(clamped);
-
-	char shared[33];
-	curve25519_donna(shared, clamped, public);
-
-	efree(clamped);
+	unclamped = estrdup(secret);
+	curve25519_donna(shared, unclamped, public);
+	efree(unclamped);
 
 #if PHP_VERSION_ID >= 70000
 	RETURN_STRINGL(shared, 32);

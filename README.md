@@ -21,7 +21,7 @@ $shared = curve25519_shared($mySecret, $theirPublic);
 
 The other party can compute the same secret by applying their secret key to your public key. Both of you can then use this shared secret for further communications.
 
-It is not necessary for you to perform key clamping as detailed at http://cr.yp.to/ecdh.html as this is handled internally by the extension.
+It is not necessary for you to perform key clamping as detailed at http://cr.yp.to/ecdh.html as this is handled internally by the curve25519 implementation.
 
 ### How to install:
 
