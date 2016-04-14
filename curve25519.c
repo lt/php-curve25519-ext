@@ -3,6 +3,8 @@
 #endif
 
 #include "php.h"
+#include "php_curve25519.h"
+#include "ext/standard/info.h"
 
 const unsigned char basepoint[32] = {9};
 
