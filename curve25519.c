@@ -17,16 +17,22 @@ void curve25519_clamp(unsigned char secret[32])
 
 PHP_FUNCTION(curve25519_public)
 {
-	unsigned char *secret;
+	char *secret;
 #if PHP_VERSION_ID >= 70000
     size_t secret_len;
 #else
     int secret_len;
 #endif	
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &secret, &secret_len) == FAILURE) {
 		RETURN_FALSE;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(secret, secret_len)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
 	if (secret_len != 32) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Secret must be 32 bytes");
@@ -36,7 +42,7 @@ PHP_FUNCTION(curve25519_public)
 	char *clamped = estrdup(secret);
 	curve25519_clamp(clamped);
 
-	unsigned char public[33];
+	char public[33];
 	curve25519_donna(public, clamped, basepoint);
 
 	efree(clamped);
@@ -50,23 +56,26 @@ PHP_FUNCTION(curve25519_public)
 
 PHP_FUNCTION(curve25519_shared)
 {
-	unsigned char *secret;
+	char *secret;
+	char *public;
 #if PHP_VERSION_ID >= 70000
     size_t secret_len;
-#else
-    int secret_len;
-#endif	
-
-	unsigned char *public;
-#if PHP_VERSION_ID >= 70000
     size_t public_len;
 #else
+    int secret_len;
     int public_len;
 #endif	
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &secret, &secret_len, &public, &public_len) == FAILURE) {
 		RETURN_FALSE;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STRING(secret, secret_len)
+		Z_PARAM_STRING(public, public_len)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
 	if (secret_len != 32) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Secret must be 32 bytes");
@@ -81,7 +90,7 @@ PHP_FUNCTION(curve25519_shared)
 	char *clamped = estrdup(secret);
 	curve25519_clamp(clamped);
 
-	unsigned char shared[33];
+	char shared[33];
 	curve25519_donna(shared, clamped, public);
 
 	efree(clamped);
@@ -97,7 +106,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_curve25519_public, 0, 0, 1)
 	ZEND_ARG_INFO(0, secret)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_curve25519_shared, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_curve25519_shared, 0, 0, 2)
 	ZEND_ARG_INFO(0, secret)
 	ZEND_ARG_INFO(0, public)
 ZEND_END_ARG_INFO()
